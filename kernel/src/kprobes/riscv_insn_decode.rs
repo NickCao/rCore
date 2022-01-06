@@ -48,9 +48,8 @@ pub enum InsnStatus {
 }
 
 pub fn insn_decode(addr: usize) -> InsnStatus{
-    let addr_32 = unsafe{core::slice::from_raw_parts(addr as *const u32, 1)};
-    if addr_32[0] & 0b11 != 0b11{
-        let addr_16 = unsafe{core::slice::from_raw_parts(addr as *const u16, 1)};
+    let addr_16 = unsafe{core::slice::from_raw_parts(addr as *const u16, 1)};
+    if addr_16[0] & 0b11 != 0b11{
         match c_decode(addr_16[0]){
             Opcode::CJ => return InsnStatus::Illegal,
             Opcode::CJR => return InsnStatus::Illegal,
@@ -62,6 +61,7 @@ pub fn insn_decode(addr: usize) -> InsnStatus{
             _ => return InsnStatus::Legal,
         }
     }
+    let addr_32 = unsafe{core::slice::from_raw_parts(addr as *const u32, 1)};
     match decode(addr_32[0]){
         Ok(Instruction::Ecall) => InsnStatus::Illegal,
         Ok(Instruction::Ebreak) => InsnStatus::Illegal,
